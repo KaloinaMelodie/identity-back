@@ -16,6 +16,7 @@ class ProjectImage(BaseModel):
 
 class Project(Document):
     titre: str
+    image: Optional[ProjectImage] = None
     categories: List[str] = Field(default_factory=list)
     technos: List[str] = Field(default_factory=list)
 

@@ -16,6 +16,7 @@ class ProjectImageBase(BaseModel):
 
 class ProjectBase(BaseModel):
     titre: str
+    image: Optional[ProjectImageBase] = None
     categories: List[str] = Field(default_factory=list)
     technos: List[str] = Field(default_factory=list)
 
@@ -36,6 +37,7 @@ class ProjectCreate(ProjectBase):
 
 class ProjectUpdate(BaseModel):
     titre: Optional[str] = None
+    image: Optional[ProjectImageBase] = None
     categories: Optional[List[str]] = None
     technos: Optional[List[str]] = None
     datedebut: Optional[str] = None
