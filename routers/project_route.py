@@ -3,7 +3,6 @@ from typing import List
 from beanie import PydanticObjectId
 from fastapi import APIRouter, HTTPException, status
 
-from models.project import Project
 from schemas.project import ProjectCreate, ProjectUpdate, ProjectOut
 from services.project_service import ProjectService
 
