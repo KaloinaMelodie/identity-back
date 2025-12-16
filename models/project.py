@@ -10,7 +10,8 @@ class ProjectLink(BaseModel):
 
 
 class ProjectImage(BaseModel):
-    image: str  
+    url: str
+    key: str
     alt: str
 
 

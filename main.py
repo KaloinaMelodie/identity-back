@@ -2,8 +2,15 @@ from fastapi import FastAPI
 from core.database import initiate_database
 from routers import include_routes
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
 app = FastAPI()
+
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", "media")
+MEDIA_URL = os.getenv("MEDIA_URL", "/api/media")
+
+app.mount(MEDIA_URL, StaticFiles(directory=MEDIA_ROOT), name="media")
 
 origins = [
     "http://localhost:5173",
