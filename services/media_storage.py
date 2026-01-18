@@ -79,6 +79,25 @@ def save_techno_image(techno_id: str, b64: str) -> Tuple[str, str]:
     url = f"{MEDIA_URL}/{key}"
     return url, key
 
+def save_award_image(award_id: str, b64: str) -> Tuple[str, str]:
+    """
+    Returns (url, key).
+    key is the relative path inside MEDIA_ROOT. 
+    """
+    data, ext = decode_base64_image(b64)
+    folder = os.path.join(MEDIA_ROOT, "awards", award_id)
+    _ensure_dir(folder)
+
+    filename = f"{uuid4().hex}.{ext}"
+    key = os.path.join("awards", award_id, filename).replace("\\", "/")
+    full_path = os.path.join(MEDIA_ROOT, key)
+
+    with open(full_path, "wb") as f:
+        f.write(data)
+
+    url = f"{MEDIA_URL}/{key}"
+    return url, key
+
 def delete_media_key(key: Optional[str]) -> None:
     if not key:
         return
