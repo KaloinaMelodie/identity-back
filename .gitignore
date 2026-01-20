@@ -177,5 +177,6 @@ cython_debug/
 
 requirement.txt
 note.md
+znote
 .env.production
 *.code-workspace
