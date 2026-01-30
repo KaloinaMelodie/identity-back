@@ -3,20 +3,33 @@ from beanie import PydanticObjectId
 
 from models.contact import Contact
 from schemas.contact import ContactCreate, ContactUpdate
+from services.email_service import EmailService
+from fastapi import BackgroundTasks
 
 class ContactService:
     @staticmethod
-    async def create_contact(data: ContactCreate) -> Contact:
-        # Create contact first to get id
+    async def create_contact(
+        data: ContactCreate,
+        background_tasks: BackgroundTasks
+    ) -> Contact:
+
         contact = Contact(
             name=data.name,
             email=data.email,
             date=data.date,
             contenu=data.contenu
         )
+
         await contact.insert()
-       
         await contact.save()
+
+        background_tasks.add_task(
+            EmailService.send_contact_email,
+            data.email,
+            data.name,
+            data.contenu
+        )
+
         return contact
 
     @staticmethod
