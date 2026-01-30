@@ -1,7 +1,7 @@
 from typing import List
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status,BackgroundTasks
 
 from schemas.contact import ContactCreate, ContactUpdate, Contact
 from services.contact_service import ContactService
@@ -16,9 +16,10 @@ router = APIRouter(
     "/",
     response_model=Contact,
     status_code=status.HTTP_201_CREATED,
+    
 )
-async def create_contact(payload: ContactCreate):
-    contact = await ContactService.create_contact(payload)
+async def create_contact(payload: ContactCreate,background_tasks: BackgroundTasks):
+    contact = await ContactService.create_contact(payload, background_tasks)
     return Contact(**contact.model_dump())
 
 
