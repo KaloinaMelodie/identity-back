@@ -15,7 +15,8 @@ app.mount(MEDIA_URL, StaticFiles(directory=MEDIA_ROOT), name="media")
 origins = [
     "http://localhost:5173",
     "http://localhost:4173",
-    "https://front-identity.onrender.com"
+    "https://front-identity.onrender.com",
+    "https://front-identity-860478262732.europe-west1.run.app"
 ]
 
 app.add_middleware(
