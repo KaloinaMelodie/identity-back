@@ -16,8 +16,8 @@ origins = [
     "http://localhost:5173",
     "http://localhost:4173",
     "https://front-identity.onrender.com",
-    "https://front-identity-860478262732.europe-west1.run.app",
-    "http://localhost:4200"
+    "http://localhost:4200",
+    "https://kaloina-melodie-860478262732.europe-west1.run.app"
 ]
 
 app.add_middleware(
