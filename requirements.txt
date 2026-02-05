@@ -13,3 +13,4 @@ fastapi
 httpx
 pydantic[email]
 tiktoken
+celery

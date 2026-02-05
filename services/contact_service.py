@@ -5,6 +5,7 @@ from models.contact import Contact
 from schemas.contact import ContactCreate, ContactUpdate
 from services.email_service import EmailService
 from fastapi import BackgroundTasks
+from services.tasks import send_contact_email_task
 
 class ContactService:
     @staticmethod
@@ -23,13 +24,13 @@ class ContactService:
         await contact.insert()
         await contact.save()
 
-        background_tasks.add_task(
-            EmailService.send_contact_email,
-            data.email,
-            data.name,
-            data.contenu
-        )
-
+        # background_tasks.add_task(
+        #     EmailService.send_contact_email,
+        #     data.email,
+        #     data.name,
+        #     data.contenu
+        # )
+        send_contact_email_task.delay(data.email, data.name, data.contenu)
         return contact
 
     @staticmethod
