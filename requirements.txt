@@ -16,3 +16,6 @@ tiktoken
 celery
 redis
 kombu
+resend
+sendgrid
+mailgun

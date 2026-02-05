@@ -1,8 +1,6 @@
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import os
 import logging
+from resend import Resend
 
 logger = logging.getLogger(__name__)
 
@@ -14,55 +12,37 @@ class EmailService:
         message: str
     ):
         try:
-            smtp_host = os.getenv("SMTP_HOST")
-            smtp_port = int(os.getenv("SMTP_PORT", 587))
-            smtp_user = os.getenv("SMTP_USER")
-            smtp_password = os.getenv("SMTP_PASSWORD")
+            resend_api_key = os.getenv("RESEND_API_KEY")
             receiver_email = os.getenv("CONTACT_RECEIVER_EMAIL")
-
-            # Validate environment variables
-            if not all([smtp_host, smtp_user, smtp_password, receiver_email]):
+            from_email = os.getenv("FROM_EMAIL")  # Must be verified domain in Resend
+            
+            if not all([resend_api_key, receiver_email, from_email]):
                 missing = []
-                if not smtp_host: missing.append("SMTP_HOST")
-                if not smtp_user: missing.append("SMTP_USER")
-                if not smtp_password: missing.append("SMTP_PASSWORD")
+                if not resend_api_key: missing.append("RESEND_API_KEY")
                 if not receiver_email: missing.append("CONTACT_RECEIVER_EMAIL")
+                if not from_email: missing.append("FROM_EMAIL")
                 raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
 
-            logger.info(f"Attempting to send email via {smtp_host}:{smtp_port}")
+            logger.info(f"Sending email via Resend API")
 
-            msg = MIMEMultipart()
-            msg["From"] = smtp_user
-            msg["To"] = receiver_email
-            msg["Subject"] = "New Contact Message"
+            resend_client = Resend(api_key=resend_api_key)
+            
+            params = {
+                "from": from_email,
+                "to": [receiver_email],
+                "subject": "New Contact Message",
+                "html": f"""
+                    <h2>New contact received</h2>
+                    <p><strong>Name:</strong> {name}</p>
+                    <p><strong>Email:</strong> {sender_email}</p>
+                    <p><strong>Message:</strong></p>
+                    <p>{message}</p>
+                """,
+            }
 
-            body = f"""
-New contact received:
+            email = resend_client.emails.send(params)
+            logger.info(f"Email sent successfully via Resend: {email}")
 
-Name: {name}
-Email: {sender_email}
-
-Message:
-{message}
-            """
-
-            msg.attach(MIMEText(body, "plain"))
-
-            with smtplib.SMTP(smtp_host, smtp_port, timeout=30) as server:
-                logger.info("Connected to SMTP server")
-                server.starttls()
-                logger.info("TLS started")
-                server.login(smtp_user, smtp_password)
-                logger.info("Login successful")
-                server.send_message(msg)
-                logger.info(f"Email sent successfully to {receiver_email}")
-
-        except smtplib.SMTPAuthenticationError as e:
-            logger.error(f"SMTP Authentication failed: {str(e)}")
-            raise
-        except smtplib.SMTPException as e:
-            logger.error(f"SMTP error occurred: {str(e)}")
-            raise
         except Exception as e:
-            logger.error(f"Unexpected error sending email: {str(e)}", exc_info=True)
+            logger.error(f"Failed to send email via Resend: {str(e)}", exc_info=True)
             raise
