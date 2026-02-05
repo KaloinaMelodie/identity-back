@@ -1,5 +1,5 @@
 from celery import Celery
-from email_service import EmailService
+from services.email_service import EmailService
 
 celery_app = Celery("tasks", broker="redis://redis:6379/0")
 
