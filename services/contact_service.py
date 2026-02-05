@@ -1,11 +1,13 @@
 from typing import List, Optional
 from beanie import PydanticObjectId
+import logging
 
 from models.contact import Contact
 from schemas.contact import ContactCreate, ContactUpdate
 from services.email_service import EmailService
 from fastapi import BackgroundTasks
-from services.tasks import send_contact_email_task
+
+logger = logging.getLogger(__name__)
 
 class ContactService:
     @staticmethod
@@ -22,15 +24,25 @@ class ContactService:
         )
 
         await contact.insert()
-        await contact.save()
+        # Remove this line - insert() already saves
+        # await contact.save()
 
-        # background_tasks.add_task(
-        #     EmailService.send_contact_email,
-        #     data.email,
-        #     data.name,
-        #     data.contenu
-        # )
-        send_contact_email_task.delay(data.email, data.name, data.contenu)
+        # Wrapper function to catch errors
+        async def send_email_wrapper():
+            try:
+                logger.info(f"Starting email send for contact: {data.email}")
+                EmailService.send_contact_email(
+                    data.email,
+                    data.name,
+                    data.contenu
+                )
+                logger.info(f"Email sent successfully for: {data.email}")
+            except Exception as e:
+                logger.error(f"Failed to send contact email: {str(e)}", exc_info=True)
+                # Don't raise - we don't want to crash the background task
+
+        background_tasks.add_task(send_email_wrapper)
+
         return contact
 
     @staticmethod
