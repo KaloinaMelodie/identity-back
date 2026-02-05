@@ -37,6 +37,7 @@ async def start_db():
 
 include_routes(app) 
 
+@app.head("/")
 @app.get("/")
-def read_root():
-    return {"Hello": "World"}
+async def root():
+    return {"message": "Service is running"}
