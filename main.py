@@ -16,12 +16,13 @@ origins = [
     "http://localhost:5173",
     "http://localhost:4173",
     "https://front-identity.onrender.com",
-    "https://front-identity-860478262732.europe-west1.run.app"
+    "https://front-identity-860478262732.europe-west1.run.app",
+    "http://localhost:4200"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=origins,  
     allow_credentials=True,
     allow_methods=["*"],     # GET, POST, PUT, DELETE…
     allow_headers=["*"],     # tous les headers
