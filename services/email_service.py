@@ -1,6 +1,7 @@
 import os
 import logging
-from resend import Resend
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 logger = logging.getLogger(__name__)
 
@@ -12,37 +13,32 @@ class EmailService:
         message: str
     ):
         try:
-            resend_api_key = os.getenv("RESEND_API_KEY")
+            sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
             receiver_email = os.getenv("CONTACT_RECEIVER_EMAIL")
-            from_email = os.getenv("FROM_EMAIL")  # Must be verified domain in Resend
+            from_email = os.getenv("FROM_EMAIL")
             
-            if not all([resend_api_key, receiver_email, from_email]):
-                missing = []
-                if not resend_api_key: missing.append("RESEND_API_KEY")
-                if not receiver_email: missing.append("CONTACT_RECEIVER_EMAIL")
-                if not from_email: missing.append("FROM_EMAIL")
-                raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+            if not all([sendgrid_api_key, receiver_email, from_email]):
+                raise ValueError("Missing SendGrid configuration")
 
-            logger.info(f"Sending email via Resend API")
+            logger.info("Sending email via SendGrid API")
 
-            resend_client = Resend(api_key=resend_api_key)
-            
-            params = {
-                "from": from_email,
-                "to": [receiver_email],
-                "subject": "New Contact Message",
-                "html": f"""
+            message_obj = Mail(
+                from_email=from_email,
+                to_emails=receiver_email,
+                subject="New Contact Message",
+                html_content=f"""
                     <h2>New contact received</h2>
                     <p><strong>Name:</strong> {name}</p>
                     <p><strong>Email:</strong> {sender_email}</p>
                     <p><strong>Message:</strong></p>
                     <p>{message}</p>
-                """,
-            }
-
-            email = resend_client.emails.send(params)
-            logger.info(f"Email sent successfully via Resend: {email}")
+                """
+            )
+            
+            sg = SendGridAPIClient(sendgrid_api_key)
+            response = sg.send(message_obj)
+            logger.info(f"Email sent via SendGrid: {response.status_code}")
 
         except Exception as e:
-            logger.error(f"Failed to send email via Resend: {str(e)}", exc_info=True)
+            logger.error(f"Failed to send email via SendGrid: {str(e)}", exc_info=True)
             raise
